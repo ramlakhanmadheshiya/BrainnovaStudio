@@ -634,7 +634,8 @@ def fetch_bundles():
     if BUNDLES.exists():
         shutil.rmtree(BUNDLES)
     BUNDLES.mkdir()
-    subprocess.run(["git", "fetch", "-q", "--depth=1", "origin", "+refs/heads/build/*:refs/remotes/origin/build/*"], cwd=ROOT, check=True)
+    # No game has sent a build yet on a brand-new repo: fine, nothing to fetch.
+    subprocess.run(["git", "fetch", "-q", "--depth=1", "origin", "+refs/heads/build/*:refs/remotes/origin/build/*"], cwd=ROOT, check=False)
     refs = subprocess.run(["git", "for-each-ref", "--format=%(refname:short)", "refs/remotes/origin/build/"],
                           cwd=ROOT, check=True, capture_output=True, text=True).stdout.split()
     for ref in refs:
