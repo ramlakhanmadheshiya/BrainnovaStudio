@@ -76,6 +76,12 @@ def short_hash(path):
     return hashlib.sha1(path.read_bytes()).hexdigest()[:10]
 
 
+def A(name):
+    """URL of a site asset, versioned by its content. Cloudflare tells browsers to
+    keep these for hours, so a changed file must get a new URL to be seen."""
+    return f"/BrainnovaStudio/assets/{name}?v={short_hash(SRC / 'assets' / name)}"
+
+
 def links(studio, g):
     """Every URL a game can point to, in one place."""
     base = studio["base"]
@@ -158,11 +164,11 @@ def head(studio, title, desc, path, extra="", robots=""):
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{e(url)}">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="{base}/assets/logo.svg" type="image/svg+xml">
+<link rel="icon" href="{A('logo.svg')}" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{base}/assets/studio.css">
+<link rel="stylesheet" href="{A('studio.css')}">
 {PLATFORM_JS}
 {extra}
 </head>"""
@@ -205,8 +211,13 @@ def footer(studio):
 </footer>"""
 
 
+# Engine files the service worker downloads in the background on studio pages
+# (filled in by build() once it knows which engines the games use).
+WARM = []
+
+
 def page(studio, title, desc, path, active, body, scripts="", extra_head="", robots=""):
-    base = studio["base"]
+    warm = f'<script>window.BN_WARM={json.dumps(WARM)};</script>' if WARM else ""
     return f"""{head(studio, title, desc, path, extra_head, robots)}
 <body>
 {nav(studio, active)}
@@ -214,7 +225,8 @@ def page(studio, title, desc, path, active, body, scripts="", extra_head="", rob
 {body}
 </main>
 {footer(studio)}
-<script src="{base}/assets/studio.js" defer></script>
+{warm}
+<script src="{A('studio.js')}" defer></script>
 {scripts}
 </body>
 </html>
@@ -557,7 +569,10 @@ def play_page(data, g, bundle, engines):
         "game": {k: g[k] for k in ("slug", "name", "tagline", "hint", "status", "package")} | {"links": L},
         "games": [{"slug": o["slug"], "name": o["name"], "status": o["status"], "links": links(studio, o)} for o in data["games"]],
         "build": ({"engine": engine, "pack": play["pack"], "assets": play["assets"], "godot": play["godot"],
-                   "version": bundle.get("version", "")} if play and engine else None),
+                   "config": play.get("config"), "version": bundle.get("version", "")} if play and engine else None),
+        # play.js re-reads this (uncached), so a new build counts at once even if the
+        # page itself is still cached somewhere.
+        "buildUrl": f"{base}/play/{g['slug']}/build.json",
     }
     preload = f'<link rel="preload" href="{engine["js"]}" as="script">' if cfg["build"] else ""
     return f"""<!doctype html>
@@ -577,7 +592,7 @@ def play_page(data, g, bundle, engines):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="{base}/assets/play.css">
+<link rel="stylesheet" href="{A('play.css')}">
 {PLATFORM_JS}
 <script>window.BN_CONFIG={json.dumps(cfg, separators=(",", ":"))};</script>
 </head>
@@ -598,11 +613,30 @@ def play_page(data, g, bundle, engines):
 </div>
 <div id="bn-banner" class="banner" hidden></div>
 <div id="bn-modal" class="modal" hidden></div>
-<script src="{base}/assets/qr.js" defer></script>
-<script src="{base}/assets/play.js"></script>
+<script src="{A('qr.js')}" defer></script>
+<script src="{A('play.js')}"></script>
 </body>
 </html>
 """
+
+
+def build_info(bundle, engines):
+    play = bundle.get("play")
+    engine = (play.get("engine") or engines.get(bundle.get("godot", ""))) if play else None
+    if not (play and engine):
+        return None
+    return {"engine": engine, "pack": play["pack"], "assets": play["assets"], "godot": play["godot"],
+            "config": play.get("config"), "version": bundle.get("version", "")}
+
+
+def warm_list(engines):
+    """The shared engine files, warmed in the background by sw.js on studio pages."""
+    out = []
+    for eng in engines.values():
+        if eng:
+            base = eng["exe"]
+            out += [base + ".js", base + ".wasm", base + ".audio.worklet.js", base + ".audio.position.worklet.js"]
+    return out
 
 
 def redirect(to):
@@ -622,7 +656,7 @@ def not_found(data):
 <p class="lede">It may have moved, or never existed.</p>
 <p><a class="btn btn-primary btn-lg" href="{studio['base']}/games/">{ICONS['arrow']}<span>All games</span></a></p>
 </div></section>"""
-    route = f'<script src="{studio["base"]}/assets/route.js"></script>'
+    route = f'<script src="{A("route.js")}"></script>'
     return page(studio, "Not found · Brainnova Studio", "Page not found.", f"{studio['base']}/404.html", "", body,
                 extra_head=route, robots="noindex")
 
@@ -660,12 +694,15 @@ def engine_for(godot):
         except Exception as err:
             print(f"warning: no slim engine for {godot} ({err})")
             return None
-    out = DIST / "engine" / godot
+    # The folder name carries a content hash: a rebuilt engine gets a new address,
+    # so nobody keeps an old copy (sw.js caches these forever).
+    tag = f"{godot}-{short_hash(zpath)}"
+    out = DIST / "engine" / tag
     out.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(zpath) as z:
         for name in ("godot.js", "godot.wasm", "godot.audio.worklet.js", "godot.audio.position.worklet.js"):
             (out / name).write_bytes(z.read(name))
-    base = f"/BrainnovaStudio/engine/{godot}/"
+    base = f"/BrainnovaStudio/engine/{tag}/"
     return {"js": base + "godot.js", "exe": base + "godot", "wasm": base + "godot.wasm", "wasmSize": (out / "godot.wasm").stat().st_size}
 
 
@@ -744,6 +781,7 @@ def build():
 
     engines = {}
     bundles = {g["slug"]: place_bundle(data, g, engines) for g in data["games"]}
+    WARM[:] = warm_list(engines)
     for g in data["games"]:
         shots = [f"{studio['base']}/media/{g['slug']}/{s}" for s in g.get("shots", [])]
         if not shots:
@@ -763,6 +801,7 @@ def build():
                 write(f"games/{g['slug']}/{kind}/index.html", doc_page(data, g, kind, b[kind]))
         write(f"test/{g['slug']}/index.html", test_game_page(data, g))
         write(f"play/{g['slug']}/index.html", play_page(data, g, b, engines))
+        write(f"play/{g['slug']}/build.json", json.dumps(build_info(b, engines)))
     # Read by the play page, the 404 router and anything else that wants to know where a game stands.
     public = {"studio": studio, "web": data["web"],
               "games": [{k: v for k, v in g.items() if not k.startswith("_")} | {"links": links(studio, g)} for g in data["games"]]}

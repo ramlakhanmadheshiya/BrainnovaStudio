@@ -23,12 +23,29 @@ self.addEventListener('fetch', (event) => {
 	}));
 });
 
+// Studio pages ask for the shared engine to be fetched ahead of time.
+// waitUntil keeps the worker alive until it's stored, even if the page is left.
+self.addEventListener('message', (event) => {
+	const urls = (event.data && event.data.warm) || [];
+	event.waitUntil(caches.open(CACHE).then(async (cache) => {
+		for (const url of urls) {
+			if (!KEEP.test(new URL(url, self.location.href).pathname) || await cache.match(url)) continue;
+			try {
+				const res = await fetch(url, { priority: 'low' });
+				if (res.ok) { await cache.put(url, res); prune(cache, new URL(url, self.location.href).href); }
+			} catch (_) { /* offline: try again next visit */ }
+		}
+	}));
+});
+
 // Drop older builds of the same game once a newer one is cached.
+// (a game's data/<hash>/, or engine/<godot>-<hash>/)
+const VERSIONED = /^(\/BrainnovaStudio\/(?:play\/[^/]+\/data\/|engine\/[^/]+-))([0-9a-f]{10})\//;
 async function prune(cache, url) {
-	const m = new URL(url).pathname.match(/^(\/BrainnovaStudio\/play\/[^/]+\/data\/)([0-9a-f]{10})\//);
+	const m = new URL(url).pathname.match(VERSIONED);
 	if (!m) return;
 	for (const key of await cache.keys()) {
-		const k = new URL(key.url).pathname.match(/^(\/BrainnovaStudio\/play\/[^/]+\/data\/)([0-9a-f]{10})\//);
+		const k = new URL(key.url).pathname.match(VERSIONED);
 		if (k && k[1] === m[1] && k[2] !== m[2]) cache.delete(key);
 	}
 }

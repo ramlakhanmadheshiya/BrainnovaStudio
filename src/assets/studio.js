@@ -44,6 +44,22 @@
 	systemDark.addEventListener('change', paintToggle);
 	paintToggle();
 
+	// ------------------------------------------------------------ warm the game engine
+	// Every browser game shares one engine. While the visitor looks around, the
+	// service worker quietly downloads and keeps it, so "Play in browser" then only
+	// needs the game's own small pack. Not on Android (no browser play there) and
+	// not when the visitor asked to save data.
+	const conn = navigator.connection || {};
+	if (window.BN_WARM && window.BN_WARM.length && platform !== 'android' && 'serviceWorker' in navigator
+		&& !conn.saveData && !/(^|-)2g$/.test(conn.effectiveType || '')) {
+		addEventListener('load', () => setTimeout(() => {
+			navigator.serviceWorker.register((studio.base || '/BrainnovaStudio') + '/sw.js')
+				.then(() => navigator.serviceWorker.ready)
+				.then((reg) => reg.active && reg.active.postMessage({ warm: window.BN_WARM }))
+				.catch(() => {});
+		}, 2500));
+	}
+
 	// ------------------------------------------------------------ device line
 	const device = $('[data-device]');
 	if (device) {

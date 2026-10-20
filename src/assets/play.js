@@ -77,7 +77,7 @@
 	// game's own small pack download together. Music and other big assets are not
 	// in the pack: the game streams them afterwards (Brainnova.assetUrl), so it can
 	// start as soon as these two arrive. sw.js keeps all of it for the next visit.
-	const B = C.build;
+	let B = C.build;
 	const MB = (n) => (n / 1048576).toFixed(n >= 10485760 ? 0 : 1);
 	let shown = 0;
 	function progress(cur, total) {
@@ -127,6 +127,11 @@
 	}
 
 	async function boot() {
+		// The newest build info, even if this page came from a cache.
+		try {
+			const r = await fetch(C.buildUrl + '?t=' + Date.now(), { cache: 'no-store' });
+			if (r.ok) B = (await r.json()) || B;
+		} catch (_) { /* offline: use what the page has */ }
 		if (!B) {
 			showCard(`<p>${esc(g.name)} isn't ready to play in the browser yet.</p><a class="cta" href="${esc(L.page)}">About ${esc(g.name)}</a>`);
 			return;
@@ -173,6 +178,11 @@
 
 	function house() {
 		// A gentle, tappable strip about our own games, same size as a real banner.
+		// iPhone, iPad, Mac can't install Android apps: show them our other games.
+		if (full) {
+			return `<a class="house" href="${esc(C.studio.base)}/games/" target="_blank" rel="noopener">
+				<img src="${esc(C.studio.base)}/assets/logo.svg" alt="" width="34" height="34"><span><b>More games from Brainnova Studio</b><small>Free to play in your browser</small></span><em>Brainnova</em></a>`;
+		}
 		const pool = C.games.filter((o) => o.status !== 'development');
 		const pick = pool.find((o) => o.slug === g.slug) || pool[0];
 		if (!pick) return '';
