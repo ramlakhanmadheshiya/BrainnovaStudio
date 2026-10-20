@@ -7,7 +7,6 @@
     "support": "support@theramlakhan.com",
     "testers_group": "brainnova-testers"
   },
-
   "web": {
     "free_levels": 10,
     "ads": {
@@ -18,9 +17,11 @@
       "interstitial": ""
     }
   },
-
-  "statuses": ["development", "closed-testing", "published"],
-
+  "statuses": [
+    "development",
+    "closed-testing",
+    "published"
+  ],
   "games": [
     {
       "slug": "single-shot",
@@ -30,10 +31,30 @@
       "hint": "Drag to aim. Every wall is a second chance.",
       "package": "com.theramlakhan.singleshot",
       "status": "closed-testing",
-      "dates": { "started": "2026-10-03", "testing": null, "published": null },
-      "colors": { "bg": "#241E52", "accent": "#FF6B5B", "glow": "#FFC9A8" },
-      "facts": ["360 rooms", "9 chapters", "One shot each"],
-      "shots": ["dawn.jpg", "glass.jpg", "prism.jpg", "chapters.jpg"]
+      "dates": {
+        "started": "2026-10-03",
+        "testing": null,
+        "published": null
+      },
+      "colors": {
+        "bg": "#241E52",
+        "accent": "#FF6B5B",
+        "glow": "#FFC9A8"
+      },
+      "facts": [
+        "360 rooms",
+        "9 chapters",
+        "One shot each"
+      ],
+      "shots": [
+        "dawn.jpg",
+        "glass.jpg",
+        "prism.jpg",
+        "chapters.jpg"
+      ],
+      "aliases": [
+        "one-clean-shot"
+      ]
     },
     {
       "slug": "word-lantern",
@@ -43,9 +64,20 @@
       "hint": "Drag through letters to light a word.",
       "package": "com.theramlakhan.wordlantern",
       "status": "development",
-      "dates": { "started": "2026-10-15", "testing": null, "published": null },
-      "colors": { "bg": "#141235", "accent": "#FF7A45", "glow": "#FFE3A6" },
-      "facts": ["Themed grids", "Hidden words"],
+      "dates": {
+        "started": "2026-10-15",
+        "testing": null,
+        "published": null
+      },
+      "colors": {
+        "bg": "#141235",
+        "accent": "#FF7A45",
+        "glow": "#FFE3A6"
+      },
+      "facts": [
+        "Themed grids",
+        "Hidden words"
+      ],
       "shots": []
     },
     {
@@ -56,9 +88,20 @@
       "hint": "Fence in empty space. Bigger pens, bigger scores.",
       "package": "com.theramlakhan.corral",
       "status": "development",
-      "dates": { "started": "2026-10-19", "testing": null, "published": null },
-      "colors": { "bg": "#2B2862", "accent": "#7FDDB8", "glow": "#FFCDB8" },
-      "facts": ["Endless", "9 × 9 field"],
+      "dates": {
+        "started": "2026-10-19",
+        "testing": null,
+        "published": null
+      },
+      "colors": {
+        "bg": "#2B2862",
+        "accent": "#7FDDB8",
+        "glow": "#FFCDB8"
+      },
+      "facts": [
+        "Endless",
+        "9 × 9 field"
+      ],
       "shots": []
     },
     {
@@ -69,9 +112,20 @@
       "hint": "Tap one twin and both escape.",
       "package": "com.theramlakhan.mirrorlock",
       "status": "development",
-      "dates": { "started": "2026-10-19", "testing": null, "published": null },
-      "colors": { "bg": "#0B0C24", "accent": "#4FE3FF", "glow": "#FF5FD2" },
-      "facts": ["Twin pieces", "No bumps"],
+      "dates": {
+        "started": "2026-10-19",
+        "testing": null,
+        "published": null
+      },
+      "colors": {
+        "bg": "#0B0C24",
+        "accent": "#4FE3FF",
+        "glow": "#FF5FD2"
+      },
+      "facts": [
+        "Twin pieces",
+        "No bumps"
+      ],
       "shots": []
     },
     {
@@ -82,9 +136,20 @@
       "hint": "Hold to grow, let go to burst.",
       "package": "com.theramlakhan.ringburst",
       "status": "development",
-      "dates": { "started": "2026-10-19", "testing": null, "published": null },
-      "colors": { "bg": "#141A3C", "accent": "#3DF5FF", "glow": "#FF4FA3" },
-      "facts": ["One touch", "Arcade"],
+      "dates": {
+        "started": "2026-10-19",
+        "testing": null,
+        "published": null
+      },
+      "colors": {
+        "bg": "#141A3C",
+        "accent": "#3DF5FF",
+        "glow": "#FF4FA3"
+      },
+      "facts": [
+        "One touch",
+        "Arcade"
+      ],
       "shots": []
     }
   ]

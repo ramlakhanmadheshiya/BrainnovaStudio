@@ -1,5 +1,5 @@
-// Brainnova Studio pages: the neural field, filters, details sheet, engine
-// prefetch, tester checklist, share and QR. No dependencies (qr.js is optional).
+// Brainnova Studio pages: theme toggle, the neural field, filters, details sheet,
+// tester checklist, share and QR. No dependencies (qr.js is optional).
 (() => {
 	'use strict';
 	const $ = (s, r = document) => r.querySelector(s);
@@ -27,6 +27,22 @@
 		clearTimeout(t._h);
 		t._h = setTimeout(() => t.classList.remove('is-on'), 2200);
 	}
+
+	// ------------------------------------------------------------ theme
+	// The first visit follows the system; the toggle then remembers the choice.
+	const root = document.documentElement;
+	const systemDark = matchMedia('(prefers-color-scheme: dark)');
+	const isDark = () => (root.dataset.theme ? root.dataset.theme === 'dark' : systemDark.matches);
+	const paintToggle = () => $$('[data-theme-toggle]').forEach((b) => {
+		b.setAttribute('aria-label', isDark() ? 'Switch to light theme' : 'Switch to dark theme');
+	});
+	$$('[data-theme-toggle]').forEach((b) => b.addEventListener('click', () => {
+		root.dataset.theme = isDark() ? 'light' : 'dark';
+		try { localStorage.setItem('bn-theme', root.dataset.theme); } catch (_) { /* private mode */ }
+		paintToggle();
+	}));
+	systemDark.addEventListener('change', paintToggle);
+	paintToggle();
 
 	// ------------------------------------------------------------ device line
 	const device = $('[data-device]');
@@ -75,25 +91,6 @@
 		});
 	}
 
-	// ------------------------------------------------------------ engine prefetch
-	// Hovering or touching "Play in browser" starts downloading the game's engine
-	// so it's (partly) cached by the time the play page asks for it.
-	const prefetched = new Set();
-	const canPrefetch = (() => { const l = document.createElement('link'); return l.relList && l.relList.supports && l.relList.supports('prefetch'); })();
-	function prefetch(base) {
-		if (!base || prefetched.has(base) || !canPrefetch || (navigator.connection && navigator.connection.saveData)) return;
-		prefetched.add(base);
-		['index.js', 'index.wasm', 'index.pck', 'index.html'].forEach((f) => {
-			const l = document.createElement('link');
-			l.rel = 'prefetch';
-			l.href = base + f;
-			document.head.append(l);
-		});
-	}
-	document.addEventListener('pointerover', (ev) => { const a = ev.target.closest && ev.target.closest('[data-engine]'); if (a) prefetch(a.dataset.engine); });
-	document.addEventListener('focusin', (ev) => { const a = ev.target.closest && ev.target.closest('[data-engine]'); if (a) prefetch(a.dataset.engine); });
-	document.addEventListener('touchstart', (ev) => { const a = ev.target.closest && ev.target.closest('[data-engine]'); if (a) prefetch(a.dataset.engine); }, { passive: true });
-
 	// ------------------------------------------------------------ details sheet
 	const sheet = $('[data-sheet]');
 	const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -124,7 +121,7 @@
 				</ol></div>
 				<div><h3>How to play</h3><p>${esc(g.hint)}</p></div>
 				<div data-sheet-actions></div>
-				${live ? `<nav class="sheet-links" aria-label="${esc(g.name)} links"><a href="${esc(g.links.site)}">${esc(g.name)} website</a><a href="${esc(g.links.site)}help/">Help</a><a href="${esc(g.links.site)}privacy/">Privacy</a></nav>` : ''}
+				${live ? `<nav class="sheet-links" aria-label="${esc(g.name)} links"><a href="${esc(g.links.page)}">More about ${esc(g.name)}</a><a href="${esc(g.links.help)}">How to play</a><a href="${esc(g.links.privacy)}">Privacy</a></nav>` : ''}
 			</div>`;
 		if (actions) $('[data-sheet-actions]', sheet).append(actions);
 		sheet.showModal();
@@ -207,7 +204,6 @@
 	function field(cv) {
 		const ctx = cv.getContext('2d');
 		let w = 0, h = 0, dpr = 1, nodes = [], waves = [], pointer = null, running = false, visible = true, last = 0, idle = 0;
-		const dark = matchMedia('(prefers-color-scheme: dark)');
 		const LINK = 130;
 
 		function size() {
@@ -242,7 +238,7 @@
 			const dt = Math.min(50, now - (last || now)); last = now;
 			idle += dt;
 			if (idle > 4200 && !reduced) nova(w * (.2 + Math.random() * .6), h * (.25 + Math.random() * .5), .7);
-			const base = dark.matches ? '255,255,255' : '29,29,31';
+			const base = isDark() ? '255,255,255' : '29,29,31';
 			ctx.clearRect(0, 0, w, h);
 
 			for (const wv of waves) wv.r += dt * .55;

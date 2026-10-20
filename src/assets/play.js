@@ -1,7 +1,8 @@
 // The browser-play page for every Brainnova game: theramlakhan.com/BrainnovaStudio/play/<slug>/
 //
-// It decides what this device may do, shows a loader, then boots the game's own
-// Godot web export from theramlakhan.com/<slug>/play/ (the game's repo publishes it).
+// It decides what this device may do, shows a loader, then boots the game with the
+// shared engine (engine/<godot>/) and the game's own pack (play/<slug>/data/), both
+// published by build.py from the game's latest build.
 // Rules (games.json decides the status, the device decides the rest):
 //
 //   status development       "Coming soon" card. ?preview plays it anyway (for you).
@@ -72,13 +73,43 @@
 	}
 
 	// ------------------------------------------------------------------ loading
-	const MB = (n) => (n / 1048576).toFixed(n > 10485760 ? 0 : 1);
+	// The engine (shared by every game, so it's cached after the first one) and the
+	// game's own small pack download together. Music and other big assets are not
+	// in the pack: the game streams them afterwards (Brainnova.assetUrl), so it can
+	// start as soon as these two arrive. sw.js keeps all of it for the next visit.
+	const B = C.build;
+	const MB = (n) => (n / 1048576).toFixed(n >= 10485760 ? 0 : 1);
+	let shown = 0;
 	function progress(cur, total) {
-		if (total > 0) {
-			const p = Math.min(100, (cur / total) * 100);
-			ring.style.strokeDashoffset = String(100 - p);
-			statusEl.textContent = p >= 99.9 ? 'Starting…' : `Loading ${MB(cur)} of ${MB(total)} MB`;
-		}
+		if (!(total > 0)) return;
+		const p = Math.min(100, (cur / total) * 100);
+		if (p < shown) return;
+		shown = p;
+		ring.style.strokeDashoffset = String(100 - p);
+		statusEl.textContent = p >= 99.5 ? 'Starting…' : `Loading ${MB(cur)} of ${MB(total)} MB`;
+	}
+
+	// Count the bytes of the engine and pack as they arrive, for an honest progress ring.
+	function trackDownloads(urls, total) {
+		const done = {};
+		const original = window.fetch.bind(window);
+		window.fetch = (input, init) => original(input, init).then((res) => {
+			const url = new URL(typeof input === 'string' ? input : input.url, location.href).pathname;
+			if (!urls.includes(url) || !res.body) return res;
+			done[url] = 0;
+			const reader = res.body.getReader();
+			const body = new ReadableStream({
+				async pull(ctrl) {
+					const { done: end, value } = await reader.read();
+					if (end) { ctrl.close(); return; }
+					done[url] += value.byteLength;
+					progress(Object.values(done).reduce((a, b) => a + b, 0), total);
+					ctrl.enqueue(value);
+				},
+				cancel(r) { reader.cancel(r); },
+			});
+			return new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
+		});
 	}
 
 	function fail(err) {
@@ -96,29 +127,30 @@
 	}
 
 	async function boot() {
+		if (!B) {
+			showCard(`<p>${esc(g.name)} isn't ready to play in the browser yet.</p><a class="cta" href="${esc(L.page)}">About ${esc(g.name)}</a>`);
+			return;
+		}
+		if ('serviceWorker' in navigator) navigator.serviceWorker.register(C.studio.base + '/sw.js').catch(() => {});
 		const slow = setTimeout(() => {
 			$('[data-hint]').textContent = 'The first visit downloads the game once. Next time it opens in a moment.';
-		}, 7000);
+		}, 6000);
 		try {
-			// The game's own export page holds its engine settings (file sizes etc).
-			const [shell] = await Promise.all([
-				fetch(L.engine + 'index.html', { cache: 'no-cache' }).then((r) => { if (!r.ok) throw new Error('Game files not found'); return r.text(); }),
-				loadScript(L.engine + 'index.js'),
-			]);
-			const m = shell.match(/const\s+GODOT_CONFIG\s*=\s*(\{[\s\S]*?\});/);
-			if (!m) throw new Error('Unreadable game settings');
-			const config = JSON.parse(m[1]);
-			config.executable = L.engine + 'index';
-			config.mainPack = L.engine + 'index.pck';
-			config.canvas = document.getElementById('canvas');
-			config.canvasResizePolicy = 2;
-			config.focusCanvas = true;
-			const threads = /GODOT_THREADS_ENABLED\s*=\s*true/.test(shell);
-			const missing = window.Engine.getMissingFeatures({ threads });
+			trackDownloads([B.engine.wasm, B.pack.url], B.engine.wasmSize + B.pack.size);
+			await loadScript(B.engine.js);
+			const config = Object.assign({}, B.config || {}, {
+				executable: B.engine.exe,
+				mainPack: B.pack.url,
+				canvas: document.getElementById('canvas'),
+				canvasResizePolicy: 2,
+				focusCanvas: true,
+				fileSizes: {},
+			});
+			const missing = window.Engine.getMissingFeatures({ threads: false });
 			if (missing.length) throw new Error('This browser is missing: ' + missing.join(', '));
 			const engine = new window.Engine(config);
 			statusEl.textContent = 'Loading…';
-			await engine.startGame({ onProgress: progress });
+			await engine.startGame({ onProgress: () => {} });
 			clearTimeout(slow);
 			loader.classList.add('is-gone');
 			setTimeout(() => loader.remove(), 700);
@@ -220,6 +252,7 @@
 	// From GDScript (JavaScriptBridge):
 	//   Brainnova.policyJSON()           -> '{"platform":"apple","levelCap":0,"interstitials":true,...}'
 	//   Brainnova.capReached()           shows the "get the full game" card
+	//   Brainnova.assetUrl("music/ch1.ogg") -> URL to stream it from ("" if none)
 	//   Brainnova.ads.bannerShow()       -> fraction of the screen height the banner takes (0 = none)
 	//   Brainnova.ads.bannerHide()
 	//   Brainnova.ads.onBannerResize(cb) cb(fraction) when the window changes size
@@ -232,6 +265,8 @@
 		platform,
 		policy,
 		game: { slug: g.slug, name: g.name, status: g.status },
+		// URL of a streamed asset ("music/ch1.ogg"), or "" if this build has none.
+		assetUrl: (rel) => (B && B.assets && B.assets[rel] ? new URL(B.assets[rel], location.href).href : ''),
 		policyJSON: () => JSON.stringify(policy),
 		capReached,
 		ads: {

@@ -1,6 +1,8 @@
 name: Publish site
 
-# Builds dist/ from games.json and publishes it to theramlakhan.com/BrainnovaStudio/.
+# Builds dist/ from games.json and every game's latest build (branches build/<slug>,
+# sent by each game's CI with tools/ship.sh, which also updates builds/<slug>.json
+# here to trigger this), and publishes it to theramlakhan.com/BrainnovaStudio/.
 
 on:
   push:
@@ -22,7 +24,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - name: Build
-        run: python3 build.py
+        run: python3 build.py --fetch
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
