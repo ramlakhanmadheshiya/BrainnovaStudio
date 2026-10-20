@@ -136,7 +136,7 @@
 			showCard(`<p>${esc(g.name)} isn't ready to play in the browser yet.</p><a class="cta" href="${esc(L.page)}">About ${esc(g.name)}</a>`);
 			return;
 		}
-		if ('serviceWorker' in navigator) navigator.serviceWorker.register(C.studio.base + '/sw.js').catch(() => {});
+		if ('serviceWorker' in navigator) navigator.serviceWorker.register(C.sw || C.studio.base + '/sw.js', { scope: C.studio.base + '/' }).catch(() => {});
 		const slow = setTimeout(() => {
 			$('[data-hint]').textContent = 'The first visit downloads the game once. Next time it opens in a moment.';
 		}, 6000);

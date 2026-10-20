@@ -53,7 +53,7 @@
 	if (window.BN_WARM && window.BN_WARM.length && platform !== 'android' && 'serviceWorker' in navigator
 		&& !conn.saveData && !/(^|-)2g$/.test(conn.effectiveType || '')) {
 		addEventListener('load', () => setTimeout(() => {
-			navigator.serviceWorker.register((studio.base || '/BrainnovaStudio') + '/sw.js')
+			navigator.serviceWorker.register(window.BN_SW || '/BrainnovaStudio/sw.js', { scope: '/BrainnovaStudio/' })
 				.then(() => navigator.serviceWorker.ready)
 				.then((reg) => reg.active && reg.active.postMessage({ warm: window.BN_WARM }))
 				.catch(() => {});
@@ -117,7 +117,7 @@
 		if (!g || !sheet) return;
 		const step = { development: 0, 'closed-testing': 1, published: 2 }[g.status];
 		const stage = (i, title, date, idle) => `<li class="${i < step ? 'done' : i === step ? 'now done' : ''}"><b>${title}</b><span>${date ? esc(nice(date)) : esc(idle)}</span></li>`;
-		const shots = (g.shots || []).map((s) => `<img src="${esc(g.links.icon.replace('icon.svg', s))}" alt="" loading="lazy">`).join('');
+		const shots = (g.shots || []).map((s) => `<img src="${esc(g.links.icon.split('?')[0].replace('icon.svg', s))}" alt="" loading="lazy">`).join('');
 		const actions = opener && opener.closest('.game') ? $('.actions', opener.closest('.game')).cloneNode(true) : null;
 		if (actions) actions.querySelector('[data-details]')?.remove();
 		const live = g.status !== 'development';

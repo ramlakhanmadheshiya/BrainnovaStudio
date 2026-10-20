@@ -82,6 +82,12 @@ def A(name):
     return f"/BrainnovaStudio/assets/{name}?v={short_hash(SRC / 'assets' / name)}"
 
 
+def SW():
+    """The service worker sits at the site root (to cover every page); versioned like
+    the assets, because Cloudflare's edge keeps .js files for hours too."""
+    return f"/BrainnovaStudio/sw.js?v={short_hash(SRC / 'assets' / 'sw.js')}"
+
+
 def links(studio, g):
     """Every URL a game can point to, in one place."""
     base = studio["base"]
@@ -95,7 +101,7 @@ def links(studio, g):
         "privacy": f"{base}/games/{g['slug']}/privacy/",
         "test": f"{base}/test/{g['slug']}/",
         "play": f"{base}/play/{g['slug']}/",
-        "icon": f"{base}/media/{g['slug']}/icon.svg",
+        "icon": f"{base}/media/{g['slug']}/icon.svg?v={short_hash(ROOT / 'media' / g['slug'] / 'icon.svg')}",
     }
 
 
@@ -217,7 +223,7 @@ WARM = []
 
 
 def page(studio, title, desc, path, active, body, scripts="", extra_head="", robots=""):
-    warm = f'<script>window.BN_WARM={json.dumps(WARM)};</script>' if WARM else ""
+    warm = f'<script>window.BN_WARM={json.dumps(WARM)};window.BN_SW="{SW()}";</script>' if WARM else ""
     return f"""{head(studio, title, desc, path, extra_head, robots)}
 <body>
 {nav(studio, active)}
@@ -573,6 +579,7 @@ def play_page(data, g, bundle, engines):
         # play.js re-reads this (uncached), so a new build counts at once even if the
         # page itself is still cached somewhere.
         "buildUrl": f"{base}/play/{g['slug']}/build.json",
+        "sw": SW(),
     }
     preload = f'<link rel="preload" href="{engine["js"]}" as="script">' if cfg["build"] else ""
     return f"""<!doctype html>
