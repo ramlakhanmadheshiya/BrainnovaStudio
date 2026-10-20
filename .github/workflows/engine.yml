@@ -2,7 +2,8 @@ name: Build slim web engine
 
 # A smaller Godot web export template for every Brainnova game: 2D only, no
 # complex-script text shaping, none of the modules these games never use.
-# Roughly half the download of the stock template, so games open faster.
+# About a third smaller download than the stock template (6.7 vs 10 MB),
+# so games open faster. Deprecated APIs stay in: the games still use some.
 #
 # Run it by hand (Actions > Build slim web engine > Run) once per Godot version.
 # It publishes a release "engine-<version>" with web_nothreads_release.zip,
