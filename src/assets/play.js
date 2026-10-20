@@ -90,6 +90,8 @@
 	}
 
 	// Count the bytes of the engine and pack as they arrive, for an honest progress ring.
+	// The count reads a clone, so the engine still gets the browser's original
+	// response (which lets the browser keep the compiled engine for next time).
 	function trackDownloads(urls, total) {
 		const done = {};
 		const original = window.fetch.bind(window);
@@ -97,18 +99,16 @@
 			const url = new URL(typeof input === 'string' ? input : input.url, location.href).pathname;
 			if (!urls.includes(url) || !res.body) return res;
 			done[url] = 0;
-			const reader = res.body.getReader();
-			const body = new ReadableStream({
-				async pull(ctrl) {
-					const { done: end, value } = await reader.read();
-					if (end) { ctrl.close(); return; }
+			const reader = res.clone().body.getReader();
+			(function pump() {
+				reader.read().then(({ done: end, value }) => {
+					if (end) return;
 					done[url] += value.byteLength;
 					progress(Object.values(done).reduce((a, b) => a + b, 0), total);
-					ctrl.enqueue(value);
-				},
-				cancel(r) { reader.cancel(r); },
-			});
-			return new Response(body, { status: res.status, statusText: res.statusText, headers: res.headers });
+					pump();
+				}).catch(() => {});
+			}());
+			return res;
 		});
 	}
 
