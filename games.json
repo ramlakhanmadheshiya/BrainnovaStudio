@@ -105,30 +105,6 @@
       "shots": []
     },
     {
-      "slug": "mirrorlock",
-      "name": "Mirrorlock",
-      "tagline": "A mirrored twin escape puzzle.",
-      "blurb": "The board is split by a glowing mirror and every piece has a twin on the other side. Tap either twin and both slide off together. If anything blocks either one, both bump back and you lose a heart.",
-      "hint": "Tap one twin and both escape.",
-      "package": "com.theramlakhan.mirrorlock",
-      "status": "development",
-      "dates": {
-        "started": "2026-10-19",
-        "testing": null,
-        "published": null
-      },
-      "colors": {
-        "bg": "#0B0C24",
-        "accent": "#4FE3FF",
-        "glow": "#FF5FD2"
-      },
-      "facts": [
-        "Twin pieces",
-        "No bumps"
-      ],
-      "shots": []
-    },
-    {
       "slug": "ringburst",
       "name": "Ringburst",
       "tagline": "A one-touch hold-and-release arcade.",
@@ -156,8 +132,8 @@
       "slug": "few-turns",
       "name": "Few Turns",
       "tagline": "A quiet arrow puzzle.",
-      "blurb": "A quiet arrow puzzle.",
-      "hint": "",
+      "blurb": "Lay a few arrows, press Go, and watch one orb roll through every red dot and home. Each room gives the fewest turns that can solve it.",
+      "hint": "A few arrows. One run home.",
       "package": "com.theramlakhan.fewturns",
       "status": "development",
       "dates": {
@@ -166,12 +142,19 @@
         "published": null
       },
       "colors": {
-        "bg": "#1B1745",
-        "accent": "#8F6BFF",
-        "glow": "#FF6B5B"
+        "bg": "#2E1B1A",
+        "accent": "#F2733C",
+        "glow": "#FFE2C8"
       },
-      "facts": [],
-      "shots": []
+      "facts": [
+        "360 rooms",
+        "Fewest turns"
+      ],
+      "shots": [],
+      "aliases": [
+        "mirror-lock",
+        "mirrorlock"
+      ]
     }
   ]
 }
