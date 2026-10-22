@@ -57,12 +57,12 @@
       ]
     },
     {
-      "slug": "word-lantern",
-      "name": "Word Lantern",
+      "slug": "word-glow",
+      "name": "Word Glow",
       "tagline": "A calm word-light puzzle.",
-      "blurb": "Every tile in the grid belongs to one hidden word on the level's theme. Drag through neighbouring letters to find each word, and it lights up like a string of paper lanterns.",
+      "blurb": "Every tile in the grid belongs to one word on the level's theme. Drag through neighbouring letters to find each word, and watch it glow. Eight chapters, each with its own new idea.",
       "hint": "Drag through letters to light a word.",
-      "package": "com.theramlakhan.wordlantern",
+      "package": "com.theramlakhan.wordglow",
       "status": "development",
       "dates": {
         "started": "2026-10-15",
@@ -76,9 +76,14 @@
       },
       "facts": [
         "Themed grids",
-        "Hidden words"
+        "8 chapters, 8 ideas"
       ],
-      "shots": []
+      "shots": [],
+      "aliases": [
+        "word-lantern",
+        "wordlantern",
+        "Word Lantern"
+      ]
     },
     {
       "slug": "ringburst",
