@@ -151,6 +151,27 @@
         "Arcade"
       ],
       "shots": []
+    },
+    {
+      "slug": "few-turns",
+      "name": "Few Turns",
+      "tagline": "A quiet arrow puzzle.",
+      "blurb": "A quiet arrow puzzle.",
+      "hint": "",
+      "package": "com.theramlakhan.fewturns",
+      "status": "development",
+      "dates": {
+        "started": "2026-10-22",
+        "testing": null,
+        "published": null
+      },
+      "colors": {
+        "bg": "#1B1745",
+        "accent": "#8F6BFF",
+        "glow": "#FF6B5B"
+      },
+      "facts": [],
+      "shots": []
     }
   ]
 }

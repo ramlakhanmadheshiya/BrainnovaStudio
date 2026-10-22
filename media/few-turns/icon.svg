@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#FF9A5C"/>
+      <stop offset="0.55" stop-color="#F2733C"/>
+      <stop offset="1" stop-color="#DC4F45"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="232" fill="url(#bg)"/>
+  <g transform="translate(512 512) scale(0.86) translate(-527 -513)">
+  <!-- start: a ring the orb sets off from -->
+  <circle cx="300" cy="730" r="62" fill="none" stroke="#FFF4E8" stroke-width="22"/>
+  <!-- the way up, dotted -->
+  <g fill="#FFF4E8" opacity="0.75"><circle cx="300" cy="640" r="15"/><circle cx="300" cy="585" r="15"/><circle cx="300" cy="530" r="15"/><circle cx="300" cy="475" r="15"/></g>
+  <!-- the one arrow you laid: it turns the orb right -->
+  <rect x="205" y="235" width="190" height="190" rx="46" fill="#FFF4E8"/>
+  <g fill="none" stroke="#E8603F" stroke-width="30" stroke-linecap="round" stroke-linejoin="round">
+    <line x1="252" y1="330" x2="348" y2="330"/>
+    <polyline points="308,290 348,330 308,370"/>
+  </g>
+  <g fill="#FFF4E8" opacity="0.75"><circle cx="430" cy="330" r="15"/><circle cx="482" cy="330" r="15"/></g>
+  <!-- the orb, rolling home -->
+  <circle cx="572" cy="330" r="92" fill="url(#glow)"/>
+  <circle cx="572" cy="330" r="44" fill="#FFF4E8"/>
+  <!-- home -->
+  <circle cx="770" cy="330" r="80" fill="none" stroke="#FFF4E8" stroke-width="22"/>
+  <circle cx="770" cy="330" r="24" fill="#FFF4E8"/>
+  </g>
+</svg>
