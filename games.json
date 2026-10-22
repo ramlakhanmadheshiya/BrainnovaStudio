@@ -81,30 +81,6 @@
       "shots": []
     },
     {
-      "slug": "corral",
-      "name": "Corral",
-      "tagline": "An endless enclosure puzzle.",
-      "blurb": "Drop chunky wall pieces on a 9 × 9 field. Close off a patch of empty cells and the pen fills with colour, scoring its area squared. One big pen beats several small ones, if you dare to wait for it.",
-      "hint": "Fence in empty space. Bigger pens, bigger scores.",
-      "package": "com.theramlakhan.corral",
-      "status": "development",
-      "dates": {
-        "started": "2026-10-19",
-        "testing": null,
-        "published": null
-      },
-      "colors": {
-        "bg": "#2B2862",
-        "accent": "#7FDDB8",
-        "glow": "#FFCDB8"
-      },
-      "facts": [
-        "Endless",
-        "9 × 9 field"
-      ],
-      "shots": []
-    },
-    {
       "slug": "ringburst",
       "name": "Ringburst",
       "tagline": "A one-touch hold-and-release arcade.",
@@ -160,22 +136,29 @@
       "slug": "snug-fit",
       "name": "Snug Fit",
       "tagline": "A calm shape puzzle.",
-      "blurb": "A calm shape puzzle.",
-      "hint": "",
+      "blurb": "Each level is a shape: a cat, a rocket, a teacup. Drag the pieces from the tray until every cell is filled, snugly. Seven chapters each add one idea: turning, colours, pegs, a spare piece, flipping, and everything at once.",
+      "hint": "Every piece. One snug fit.",
       "package": "com.theramlakhan.snugfit",
       "status": "development",
       "dates": {
-        "started": "2026-10-22",
+        "started": "2026-10-19",
         "testing": null,
         "published": null
       },
       "colors": {
-        "bg": "#1B1745",
-        "accent": "#8F6BFF",
-        "glow": "#FF6B5B"
+        "bg": "#2A2560",
+        "accent": "#4FBFA4",
+        "glow": "#FF7F6E"
       },
-      "facts": [],
-      "shots": []
+      "facts": [
+        "210 levels",
+        "7 chapters"
+      ],
+      "shots": [],
+      "aliases": [
+        "corral",
+        "snugfit"
+      ]
     }
   ]
 }
