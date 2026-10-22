@@ -155,6 +155,27 @@
         "mirror-lock",
         "mirrorlock"
       ]
+    },
+    {
+      "slug": "snug-fit",
+      "name": "Snug Fit",
+      "tagline": "A calm shape puzzle.",
+      "blurb": "A calm shape puzzle.",
+      "hint": "",
+      "package": "com.theramlakhan.snugfit",
+      "status": "development",
+      "dates": {
+        "started": "2026-10-22",
+        "testing": null,
+        "published": null
+      },
+      "colors": {
+        "bg": "#1B1745",
+        "accent": "#8F6BFF",
+        "glow": "#FF6B5B"
+      },
+      "facts": [],
+      "shots": []
     }
   ]
 }

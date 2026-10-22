@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#3A2F7A"/>
+      <stop offset="0.55" stop-color="#241E52"/>
+      <stop offset="1" stop-color="#15122F"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="232" fill="url(#bg)"/>
+  <g transform="translate(512 524) scale(1.0) translate(-512 -512)">
+    <rect x="190.0" y="190.0" width="644" height="644" rx="70" fill="#FFFFFF" opacity="0.07"/>
+    <rect x="220.0" y="238.0" width="184" height="184" rx="46" fill="#D9604F"/>
+    <rect x="358.0" y="238.0" width="108" height="184" fill="#D9604F"/>
+    <rect x="220.0" y="376.0" width="184" height="108" fill="#D9604F"/>
+    <rect x="420.0" y="238.0" width="184" height="184" rx="46" fill="#D9604F"/>
+    <rect x="220.0" y="438.0" width="184" height="184" rx="46" fill="#D9604F"/>
+    <rect x="220.0" y="220.0" width="184" height="184" rx="46" fill="#FF7F6E"/>
+    <rect x="358.0" y="220.0" width="108" height="184" fill="#FF7F6E"/>
+    <rect x="220.0" y="358.0" width="184" height="108" fill="#FF7F6E"/>
+    <rect x="420.0" y="220.0" width="184" height="184" rx="46" fill="#FF7F6E"/>
+    <rect x="220.0" y="420.0" width="184" height="184" rx="46" fill="#FF7F6E"/>
+    <line x1="412.0" y1="252.0" x2="412.0" y2="372.0" stroke="#D9604F" stroke-width="7" stroke-linecap="round" opacity="0.55"/>
+    <line x1="252.0" y1="412.0" x2="372.0" y2="412.0" stroke="#D9604F" stroke-width="7" stroke-linecap="round" opacity="0.55"/>
+    <rect x="260.0" y="242.0" width="104" height="20" rx="10" fill="#FFFFFF" opacity="0.28"/>
+    <rect x="460.0" y="242.0" width="104" height="20" rx="10" fill="#FFFFFF" opacity="0.28"/>
+    <rect x="620.0" y="238.0" width="184" height="184" rx="46" fill="#CF9227"/>
+    <rect x="620.0" y="376.0" width="184" height="108" fill="#CF9227"/>
+    <rect x="620.0" y="438.0" width="184" height="184" rx="46" fill="#CF9227"/>
+    <rect x="620.0" y="576.0" width="184" height="108" fill="#CF9227"/>
+    <rect x="620.0" y="638.0" width="184" height="184" rx="46" fill="#CF9227"/>
+    <rect x="620.0" y="220.0" width="184" height="184" rx="46" fill="#F5B544"/>
+    <rect x="620.0" y="358.0" width="184" height="108" fill="#F5B544"/>
+    <rect x="620.0" y="420.0" width="184" height="184" rx="46" fill="#F5B544"/>
+    <rect x="620.0" y="558.0" width="184" height="108" fill="#F5B544"/>
+    <rect x="620.0" y="620.0" width="184" height="184" rx="46" fill="#F5B544"/>
+    <line x1="652.0" y1="412.0" x2="772.0" y2="412.0" stroke="#CF9227" stroke-width="7" stroke-linecap="round" opacity="0.55"/>
+    <line x1="652.0" y1="612.0" x2="772.0" y2="612.0" stroke="#CF9227" stroke-width="7" stroke-linecap="round" opacity="0.55"/>
+    <rect x="660.0" y="242.0" width="104" height="20" rx="10" fill="#FFFFFF" opacity="0.28"/>
+    <rect x="420.0" y="438.0" width="184" height="184" rx="46" fill="#349C83"/>
+    <rect x="420.0" y="576.0" width="184" height="108" fill="#349C83"/>
+    <rect x="220.0" y="638.0" width="184" height="184" rx="46" fill="#349C83"/>
+    <rect x="358.0" y="638.0" width="108" height="184" fill="#349C83"/>
+    <rect x="420.0" y="638.0" width="184" height="184" rx="46" fill="#349C83"/>
+    <rect x="420.0" y="420.0" width="184" height="184" rx="46" fill="#4FBFA4"/>
+    <rect x="420.0" y="558.0" width="184" height="108" fill="#4FBFA4"/>
+    <rect x="220.0" y="620.0" width="184" height="184" rx="46" fill="#4FBFA4"/>
+    <rect x="358.0" y="620.0" width="108" height="184" fill="#4FBFA4"/>
+    <rect x="420.0" y="620.0" width="184" height="184" rx="46" fill="#4FBFA4"/>
+    <line x1="452.0" y1="612.0" x2="572.0" y2="612.0" stroke="#349C83" stroke-width="7" stroke-linecap="round" opacity="0.55"/>
+    <line x1="412.0" y1="652.0" x2="412.0" y2="772.0" stroke="#349C83" stroke-width="7" stroke-linecap="round" opacity="0.55"/>
+    <rect x="460.0" y="442.0" width="104" height="20" rx="10" fill="#FFFFFF" opacity="0.28"/>
+    <rect x="260.0" y="642.0" width="104" height="20" rx="10" fill="#FFFFFF" opacity="0.28"/>
+  </g>
+</svg>
