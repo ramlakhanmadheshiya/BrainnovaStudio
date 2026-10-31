@@ -1,11 +1,10 @@
-// Brainnova Studio pages: theme toggle, the neural field, filters, details sheet,
+// Brainnova Studio pages: theme toggle, filters, details sheet,
 // tester checklist, share and QR. No dependencies (qr.js is optional).
 (() => {
 	'use strict';
 	const $ = (s, r = document) => r.querySelector(s);
 	const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 	const platform = document.documentElement.dataset.platform || 'other';
-	const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 	const games = window.BN_GAMES || [];
 	const studio = window.BN_STUDIO || {};
 	const store = {
@@ -69,7 +68,7 @@
 			apple: 'You’re on an Apple device: play every level right here in your browser.',
 			other: `You’re on a computer: try the first ${free} levels of any game in your browser.`,
 		}[platform];
-		device.innerHTML = `<i aria-hidden="true">✦</i><span></span>`;
+		device.innerHTML = '<span></span>';
 		device.lastChild.textContent = say;
 	}
 
@@ -88,25 +87,6 @@
 		if (empty) empty.hidden = shown > 0;
 	}));
 
-	// ------------------------------------------------------------ card tilt + light
-	if (!reduced && matchMedia('(hover: hover)').matches) {
-		$$('[data-tilt]').forEach((m) => {
-			m.addEventListener('pointermove', (ev) => {
-				const r = m.getBoundingClientRect();
-				const x = (ev.clientX - r.left) / r.width;
-				const y = (ev.clientY - r.top) / r.height;
-				m.style.setProperty('--mx', `${x * 100}%`);
-				m.style.setProperty('--my', `${y * 100}%`);
-				m.style.setProperty('--ry', `${(x - .5) * 10}deg`);
-				m.style.setProperty('--rx', `${(.5 - y) * 8}deg`);
-			});
-			m.addEventListener('pointerleave', () => {
-				m.style.setProperty('--ry', '0deg');
-				m.style.setProperty('--rx', '0deg');
-			});
-		});
-	}
-
 	// ------------------------------------------------------------ details sheet
 	const sheet = $('[data-sheet]');
 	const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -123,7 +103,7 @@
 		const live = g.status !== 'development';
 		sheet.style.cssText = `--g-bg:${g.colors.bg};--g-accent:${g.colors.accent};--g-glow:${g.colors.glow}`;
 		$('[data-sheet-body]', sheet).innerHTML = `
-			<div class="sheet-hero"><div class="aura" aria-hidden="true"></div>
+			<div class="sheet-hero">
 				<img src="${esc(g.links.icon)}" alt="">
 				<div><h2 id="sheet-title">${esc(g.name)}</h2><p>${esc(g.tagline)}</p></div>
 				<button class="sheet-close" type="button" aria-label="Close" data-close>×</button></div>
@@ -211,134 +191,4 @@
 		}
 	}
 
-	// ------------------------------------------------------------ the neural field
-	// Neurons drift; the pointer pulls on them and draws synapses; a tap fires a
-	// nova that ripples outward and lights every neuron it passes.
-	const canvas = $('[data-field]');
-	if (canvas) field(canvas);
-
-	function field(cv) {
-		const ctx = cv.getContext('2d');
-		let w = 0, h = 0, dpr = 1, nodes = [], waves = [], pointer = null, running = false, visible = true, last = 0, idle = 0;
-		const LINK = 130;
-
-		function size() {
-			const r = cv.getBoundingClientRect();
-			dpr = Math.min(2, devicePixelRatio || 1);
-			w = r.width; h = r.height;
-			cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
-			ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-			const n = Math.round(Math.min(150, Math.max(40, (w * h) / 9000)));
-			nodes = Array.from({ length: n }, () => ({
-				x: Math.random() * w, y: Math.random() * h,
-				vx: (Math.random() - .5) * .25, vy: (Math.random() - .5) * .25,
-				r: 1.2 + Math.random() * 1.8, e: 0, hue: Math.random(),
-			}));
-		}
-
-		function nova(x, y, power = 1) {
-			waves.push({ x, y, r: 0, power, max: Math.hypot(w, h) * .7 });
-			idle = 0;
-		}
-
-		function color(t, a) {
-			// violet -> pink -> coral across the field
-			const c = [[123, 92, 255], [194, 92, 255], [255, 107, 91]];
-			const i = t < .5 ? 0 : 1, k = (t < .5 ? t : t - .5) * 2;
-			const m = c[i].map((v, j) => Math.round(v + (c[i + 1][j] - v) * k));
-			return `rgba(${m[0]},${m[1]},${m[2]},${a})`;
-		}
-
-		function frame(now) {
-			if (!running) return;
-			const dt = Math.min(50, now - (last || now)); last = now;
-			idle += dt;
-			if (idle > 4200 && !reduced) nova(w * (.2 + Math.random() * .6), h * (.25 + Math.random() * .5), .7);
-			const base = isDark() ? '255,255,255' : '29,29,31';
-			ctx.clearRect(0, 0, w, h);
-
-			for (const wv of waves) wv.r += dt * .55;
-			waves = waves.filter((wv) => wv.r < wv.max);
-
-			for (const n of nodes) {
-				n.x += n.vx * dt * .06; n.y += n.vy * dt * .06;
-				if (n.x < -10) n.x = w + 10; if (n.x > w + 10) n.x = -10;
-				if (n.y < -10) n.y = h + 10; if (n.y > h + 10) n.y = -10;
-				if (pointer) {
-					const dx = pointer.x - n.x, dy = pointer.y - n.y, d = Math.hypot(dx, dy);
-					if (d < 180 && d > 1) { n.x += (dx / d) * .18; n.y += (dy / d) * .18; n.e = Math.max(n.e, (1 - d / 180) * .6); }
-				}
-				for (const wv of waves) {
-					const d = Math.hypot(n.x - wv.x, n.y - wv.y);
-					if (Math.abs(d - wv.r) < 18) n.e = Math.max(n.e, wv.power * (1 - wv.r / wv.max));
-				}
-				n.e *= .965;
-			}
-
-			ctx.lineWidth = 1;
-			for (let i = 0; i < nodes.length; i++) {
-				const a = nodes[i];
-				for (let j = i + 1; j < nodes.length; j++) {
-					const b = nodes[j];
-					const dx = a.x - b.x, dy = a.y - b.y;
-					if (Math.abs(dx) > LINK || Math.abs(dy) > LINK) continue;
-					const d = Math.hypot(dx, dy);
-					if (d > LINK) continue;
-					const k = 1 - d / LINK, glow = Math.max(a.e, b.e);
-					ctx.strokeStyle = glow > .05 ? color((a.x / w + glow * .3) % 1, k * (.12 + glow * .7)) : `rgba(${base},${k * .09})`;
-					ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
-				}
-			}
-			if (pointer) {
-				for (const n of nodes) {
-					const d = Math.hypot(pointer.x - n.x, pointer.y - n.y);
-					if (d < 150) { ctx.strokeStyle = color(n.x / w, (1 - d / 150) * .45); ctx.beginPath(); ctx.moveTo(pointer.x, pointer.y); ctx.lineTo(n.x, n.y); ctx.stroke(); }
-				}
-			}
-			for (const n of nodes) {
-				ctx.fillStyle = n.e > .05 ? color(n.x / w, .35 + n.e * .65) : `rgba(${base},.28)`;
-				ctx.beginPath(); ctx.arc(n.x, n.y, n.r + n.e * 2.6, 0, 6.283); ctx.fill();
-				if (n.e > .3) { ctx.fillStyle = color(n.x / w, n.e * .12); ctx.beginPath(); ctx.arc(n.x, n.y, n.r + n.e * 14, 0, 6.283); ctx.fill(); }
-			}
-			for (const wv of waves) {
-				const k = 1 - wv.r / wv.max;
-				ctx.strokeStyle = color(wv.x / w, k * .35 * wv.power); ctx.lineWidth = 1.5;
-				ctx.beginPath(); ctx.arc(wv.x, wv.y, wv.r, 0, 6.283); ctx.stroke();
-			}
-			requestAnimationFrame(frame);
-		}
-
-		function start() { if (!running && visible && !document.hidden) { running = true; last = 0; requestAnimationFrame(frame); } }
-		function stop() { running = false; }
-
-		size();
-		if (reduced) { running = true; frame(performance.now()); running = false; }
-		else start();
-		let rz;
-		addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { size(); if (reduced) { running = true; frame(performance.now()); running = false; } }, 150); });
-		document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
-		new IntersectionObserver(([en]) => { visible = en.isIntersecting; visible ? start() : stop(); }).observe(cv);
-
-		const at = (ev) => { const r = cv.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
-		const hero = cv.parentElement;
-		hero.addEventListener('pointermove', (ev) => { if (ev.pointerType === 'mouse') pointer = at(ev); });
-		hero.addEventListener('pointerleave', () => { pointer = null; });
-		hero.addEventListener('pointerdown', (ev) => { if (ev.target.closest('a,button')) return; const p = at(ev); nova(p.x, p.y, 1); });
-		window.bnNova = (x, y) => nova(x ?? w / 2, y ?? h / 2, 1.4);
-	}
-
-	// ------------------------------------------------------------ type "nova"
-	let typed = '';
-	addEventListener('keydown', (ev) => {
-		if (ev.target.closest && ev.target.closest('input,textarea')) return;
-		typed = (typed + ev.key.toLowerCase()).slice(-4);
-		if (typed === 'nova') {
-			const s = document.createElement('div');
-			s.className = 'supernova';
-			s.style.setProperty('--x', '50%'); s.style.setProperty('--y', '40%');
-			document.body.append(s);
-			setTimeout(() => s.remove(), 1500);
-			if (window.bnNova) for (let i = 0; i < 3; i++) setTimeout(() => window.bnNova(), i * 260);
-		}
-	});
 })();

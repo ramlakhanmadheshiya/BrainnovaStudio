@@ -161,7 +161,7 @@ def head(studio, title, desc, path, extra="", robots=""):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{e(title)}</title>
 <meta name="description" content="{e(desc)}">{robots_tag}
-<meta name="theme-color" content="#fbfbfd" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#f5f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
 <link rel="canonical" href="{e(url)}">
 <meta property="og:type" content="website">
@@ -171,9 +171,6 @@ def head(studio, title, desc, path, extra="", robots=""):
 <meta property="og:url" content="{e(url)}">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="{A('logo.svg')}" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{A('studio.css')}">
 {PLATFORM_JS}
 {extra}
@@ -206,7 +203,7 @@ def footer(studio):
     year = datetime.date.today().year
     return f"""<footer class="foot">
   <div class="wrap foot-inner">
-    <div class="foot-brand">{LOGO}<div><strong>{e(studio['name'])}</strong><span>Small games with a spark, made by {e(studio['owner'])}.</span></div></div>
+    <div class="foot-brand">{LOGO}<div><strong>{e(studio['name'])}</strong><span>Puzzle and arcade games for Android and the web, made by {e(studio['owner'])}.</span></div></div>
     <nav class="foot-links" aria-label="Footer">
       <a href="{base}/games/">Games</a>
       <a href="{base}/test/">Play early</a>
@@ -291,17 +288,17 @@ def card(studio, g, i, free):
     facts = "".join(f"<li>{e(f)}</li>" for f in g.get("facts", []))
     title = e(g["name"]) if s == "development" else f'<a href="{L["page"]}">{e(g["name"])}</a>'
     return f"""<article class="game reveal" data-status="{s}" data-slug="{e(g['slug'])}" style="{style_vars(g, i)}">
-  <div class="game-media" data-tilt>
-    <div class="aura" aria-hidden="true"></div>
-    {'<div class="blueprint" aria-hidden="true"><span class="scan"></span></div>' if s == 'development' else ''}
-    <img class="game-icon" src="{L['icon']}" alt="" width="132" height="132" loading="lazy" decoding="async">
-    <span class="badge badge-{s}"><i></i>{STATUS_LABEL[s]}</span>
+  <div class="game-media">
+    <img class="game-icon" src="{L['icon']}" alt="" width="112" height="112" loading="lazy" decoding="async">
   </div>
   <div class="game-body">
-    <p class="game-date">{date_line(g)}</p>
-    <h3>{title}</h3>
+    <div class="game-head">
+      <h3>{title}</h3>
+      <span class="badge badge-{s}"><i></i>{STATUS_LABEL[s]}</span>
+    </div>
     <p class="game-tagline">{e(g['tagline'])}</p>
     <ul class="facts">{facts}</ul>
+    <p class="game-date">{date_line(g)}</p>
     {actions(studio, g, free)}
   </div>
 </article>"""
@@ -333,7 +330,7 @@ def games_page(data):
   <div class="wrap early-inner">
     <div class="early-copy">
       <p class="eyebrow">Play early</p>
-      <h2 id="early-title">Get the games before anyone else.</h2>
+      <h2 id="early-title">Test games before they launch</h2>
       <p>Before a game reaches Google Play it spends two weeks with a small group of testers. Join them, play {e(first['name'])} today, and help it launch.</p>
       <a class="btn btn-primary btn-lg" href="{studio['base']}/test/">{ICONS['flask']}<span>Become a tester</span></a>
     </div>
@@ -344,17 +341,34 @@ def games_page(data):
     </ol>
   </div>
 </section>"""
-    body = f"""<section class="hero" aria-labelledby="hero-title">
-  <canvas class="field" data-field aria-hidden="true"></canvas>
-  <div class="wrap hero-inner">
-    <p class="eyebrow reveal">Brainnova Studio · Games</p>
-    <h1 id="hero-title" class="reveal"><span>Small games.</span> <span class="nova">Big sparks.</span></h1>
-    <p class="lede reveal">Calm, clever puzzle games for Android, made by one person who loves a good “aha”. Play them in your browser, or before they launch.</p>
-    <p class="device reveal" data-device aria-live="polite"></p>
-    <ul class="stats reveal">{''.join(stats)}</ul>
+    pick = next((g for g in games if g["status"] != "development"), games[0])
+    PL = links(studio, pick)
+    pick_facts = "".join(f"<li>{e(f)}</li>" for f in pick.get("facts", []))
+    featured = f"""<section class="featured" aria-labelledby="featured-title">
+  <div class="wrap">
+    <article class="feature" data-slug="{e(pick['slug'])}" style="{style_vars(pick)}">
+      <div class="feature-copy">
+        <p class="eyebrow">Featured · {STATUS_LABEL[pick['status']]}</p>
+        <h2 id="featured-title"><a href="{PL['page']}">{e(pick['name'])}</a></h2>
+        <p class="feature-tag">{e(pick['tagline'])}</p>
+        <p class="feature-blurb">{e(pick['blurb'])}</p>
+        <ul class="facts">{pick_facts}</ul>
+        <div class="game">{actions(studio, pick, free)}</div>
+      </div>
+      <div class="feature-art"><img src="{PL['icon']}" alt="" width="200" height="200"></div>
+    </article>
   </div>
-  <p class="hero-tip" aria-hidden="true">Tap anywhere to spark an idea</p>
+</section>"""
+    body = f"""<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap hero-inner">
+    <p class="eyebrow">Brainnova Studio</p>
+    <h1 id="hero-title">Games</h1>
+    <p class="lede">Puzzle and arcade games for Android and the web. Play them on Google Play, in your browser, or early as a tester.</p>
+    <p class="device" data-device aria-live="polite"></p>
+    <ul class="stats">{''.join(stats)}</ul>
+  </div>
 </section>
+{featured}
 
 <section class="catalog" aria-labelledby="games-title">
   <div class="wrap">
@@ -549,8 +563,8 @@ def test_index_page(data):
         rows = '<p class="center">No game is in testing right now. The next one is on its way.</p>'
     body = f"""<section class="test-hero">
   <div class="wrap narrow">
-    <p class="eyebrow reveal">Play early</p>
-    <h1 class="reveal">Be the first to play.</h1>
+    <p class="eyebrow reveal">Closed testing</p>
+    <h1 class="reveal">Play early</h1>
     <p class="lede reveal">Every Brainnova game spends two weeks with testers before it reaches Google Play. Pick a game, join in three steps, and help it launch. It's free, on Android.</p>
   </div>
 </section>
